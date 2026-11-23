@@ -325,6 +325,15 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(set(ICON_FILES), set(SHAPE_NAMES))
         self.assertEqual(set(SHAPE_DESCRIPTIONS), set(SHAPE_NAMES))
 
+    def test_roll_icons_match_single_arc_and_single_direction_geometry(self):
+        for name in ("Roll", "Roll Reverse"):
+            with self.subTest(shape=name):
+                root = ET.parse(ROOT / "curve_studio" / "icons" / ICON_FILES[name]).getroot()
+                paths = root.findall(".//{http://www.w3.org/2000/svg}path")
+                self.assertEqual(len(paths), 2)
+                self.assertIn("A", paths[0].get("d", ""))
+                self.assertFalse(root.findall(".//{http://www.w3.org/2000/svg}circle"))
+
     def test_resizing_controls_are_present(self):
         tree = ast.parse((ROOT / "curve_studio" / "tool.py").read_text(encoding="utf-8"))
         calls = {node.func.attr for node in ast.walk(tree)
