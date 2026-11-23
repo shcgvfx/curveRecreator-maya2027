@@ -7,6 +7,7 @@ SHAPE_NAMES = (
     "Pole Vector", "Roll", "Roll Reverse", "Spiral CW", "Spiral CCW",
     "Foot", "Global", "FK Control", "IK Control",
     "Slider", "Stretch", "Lollipop Finger", "Aim Target", "Joint",
+    "Diamond Cube", "Pyramid", "Sphere", "Cylinder",
 )
 PLANES = ("XY", "XZ", "YZ")
 ICON_FILES = {
@@ -32,6 +33,10 @@ ICON_FILES = {
     "Lollipop Finger": "lollipop_finger.svg",
     "Aim Target": "aim_target.svg",
     "Joint": "joint.svg",
+    "Diamond Cube": "diamond_cube.svg",
+    "Pyramid": "pyramid.svg",
+    "Sphere": "sphere.svg",
+    "Cylinder": "cylinder.svg",
 }
 SHAPE_DESCRIPTIONS = {
     "Circle": "General rotation or round control",
@@ -56,6 +61,10 @@ SHAPE_DESCRIPTIONS = {
     "Lollipop Finger": "Finger controller with its stem anchored at the origin",
     "Aim Target": "Concentric target and open crosshairs for aim and look-at controls",
     "Joint": "Bone-style joint marker for locating or orienting rig joints",
+    "Diamond Cube": "Three-dimensional cube control with a diamond-shaped silhouette",
+    "Pyramid": "Square pyramid control for spatial direction and volume",
+    "Sphere": "Three-axis spherical control for global rotation",
+    "Cylinder": "Vertical cylinder control for volume and axial rotation",
 }
 
 
@@ -129,6 +138,55 @@ def segments(shape, size=2.0, plane="XY"):
             [(.5, .5, -.5), (.5, .5, .5)], [(-.5, .5, -.5), (-.5, .5, .5)],
         ]
         return [[tuple(axis * size for axis in point) for point in line] for line in cube]
+    if shape == "Diamond Cube":
+        corners = []
+        angle_y, angle_x = math.radians(45), math.radians(28)
+        for x in (-.36, .36):
+            for y in (-.36, .36):
+                for z in (-.36, .36):
+                    # Rotate the cube in 3D so its projected outline reads as a diamond.
+                    rx = x * math.cos(angle_y) + z * math.sin(angle_y)
+                    rz = -x * math.sin(angle_y) + z * math.cos(angle_y)
+                    ry = y * math.cos(angle_x) - rz * math.sin(angle_x)
+                    rz2 = y * math.sin(angle_x) + rz * math.cos(angle_x)
+                    corners.append((rx * size, ry * size, rz2 * size))
+        edges = []
+        for index, point in enumerate(corners):
+            for other in range(index + 1, len(corners)):
+                if (index ^ other) in (1, 2, 4):
+                    edges.append([point, corners[other]])
+        return edges
+    if shape == "Pyramid":
+        base = [(-.36, -.30, -.36), (.36, -.30, -.36),
+                (.36, -.30, .36), (-.36, -.30, .36)]
+        apex = (0.0, .48, 0.0)
+        points = [tuple(axis * size for axis in point) for point in base]
+        tip = tuple(axis * size for axis in apex)
+        return [points + [points[0]]] + [[point, tip] for point in points]
+    if shape == "Sphere":
+        count, radius = 48, .43 * size
+        circles = []
+        for plane_axes in ((0, 1), (0, 2), (1, 2)):
+            line = []
+            for index in range(count + 1):
+                angle = 2 * math.pi * index / count
+                point = [0.0, 0.0, 0.0]
+                point[plane_axes[0]] = radius * math.cos(angle)
+                point[plane_axes[1]] = radius * math.sin(angle)
+                line.append(tuple(point))
+            circles.append(line)
+        return circles
+    if shape == "Cylinder":
+        radius, half_height, count = .36 * size, .42 * size, 48
+        rings = []
+        for y in (-half_height, half_height):
+            rings.append([(radius * math.cos(2 * math.pi * i / count), y,
+                           radius * math.sin(2 * math.pi * i / count))
+                          for i in range(count + 1)])
+        sides = [[(radius * math.cos(angle), -half_height, radius * math.sin(angle)),
+                  (radius * math.cos(angle), half_height, radius * math.sin(angle))]
+                 for angle in (0, math.pi / 2, math.pi, 3 * math.pi / 2)]
+        return rings + sides
     if shape == "Cross":
         return [[(-.5 * size, 0, 0), (.5 * size, 0, 0)],
                 [(0, -.5 * size, 0), (0, .5 * size, 0)],

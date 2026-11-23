@@ -260,6 +260,18 @@ class GeometryTests(unittest.TestCase):
                     self.assertTrue(all(abs(a - b) < 1e-8
                                         for a, b in zip(line[0], line[-1])))
 
+    def test_three_dimensional_volume_controls_have_xyz_geometry(self):
+        self.assertEqual(len(segments("Diamond Cube", 2.0)), 12)
+        self.assertEqual(len(segments("Pyramid", 2.0)), 5)
+        self.assertEqual(len(segments("Sphere", 2.0)), 3)
+        self.assertEqual(len(segments("Cylinder", 2.0)), 6)
+        for name in ("Diamond Cube", "Pyramid", "Sphere", "Cylinder"):
+            with self.subTest(shape=name):
+                points = [point for line in segments(name, 2.0) for point in line]
+                for axis in range(3):
+                    self.assertGreater(max(point[axis] for point in points), 0.0)
+                    self.assertLess(min(point[axis] for point in points), 0.0)
+
     def test_invalid_size_plane_and_shape_are_rejected(self):
         for size in (0, -1, float("inf"), "bad"):
             with self.subTest(size=size), self.assertRaises(ValueError):
