@@ -196,6 +196,28 @@ class GeometryTests(unittest.TestCase):
         self.assertGreater(len(result[0]), 40)
         self.assertEqual(result[1][0], result[1][-1])
 
+    def test_reverse_roll_points_and_arrow_in_opposite_direction(self):
+        forward = segments("Roll", 2.0, "XY")
+        reverse = segments("Roll Reverse", 2.0, "XY")
+        self.assertAlmostEqual(forward[0][0][0], reverse[0][-1][0], places=7)
+        self.assertAlmostEqual(forward[0][0][1], reverse[0][-1][1], places=7)
+        self.assertEqual(len(reverse), 2)
+        self.assertEqual(reverse[1][0], reverse[1][-1])
+
+    def test_spiral_shapes_turn_in_opposite_directions_on_every_plane(self):
+        for plane in PLANES:
+            with self.subTest(plane=plane):
+                clockwise = segments("Spiral CW", 2.0, plane)
+                counterclockwise = segments("Spiral CCW", 2.0, plane)
+                self.assertEqual(len(clockwise[0]), 101)
+                self.assertEqual(len(counterclockwise[0]), 101)
+                self.assertEqual(clockwise[1][0], clockwise[1][-1])
+                self.assertEqual(counterclockwise[1][0], counterclockwise[1][-1])
+                self.assertNotEqual(clockwise[0][10], counterclockwise[0][10])
+                zero_axis = {"XY": 2, "XZ": 1, "YZ": 0}[plane]
+                self.assertTrue(all(abs(point[zero_axis]) < 1e-9
+                                    for line in clockwise + counterclockwise for point in line))
+
     def test_bidirectional_arrow_is_a_closed_two_headed_outline(self):
         for plane in PLANES:
             with self.subTest(plane=plane):

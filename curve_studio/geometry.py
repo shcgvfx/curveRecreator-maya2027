@@ -4,7 +4,8 @@ import math
 
 SHAPE_NAMES = (
     "Circle", "Square", "Triangle", "Box", "Arrow", "Bidirectional Arrow", "Cross", "Locator",
-    "Pole Vector", "Roll", "Foot", "Global", "FK Control", "IK Control",
+    "Pole Vector", "Roll", "Roll Reverse", "Spiral CW", "Spiral CCW",
+    "Foot", "Global", "FK Control", "IK Control",
     "Slider", "Stretch", "Lollipop Finger",
 )
 PLANES = ("XY", "XZ", "YZ")
@@ -19,6 +20,9 @@ ICON_FILES = {
     "Locator": "locator.svg",
     "Pole Vector": "pole_vector.svg",
     "Roll": "roll.svg",
+    "Roll Reverse": "roll_reverse.svg",
+    "Spiral CW": "spiral_cw.svg",
+    "Spiral CCW": "spiral_ccw.svg",
     "Foot": "foot.svg",
     "Global": "global.svg",
     "FK Control": "fk_control.svg",
@@ -38,6 +42,9 @@ SHAPE_DESCRIPTIONS = {
     "Locator": "Compact position marker",
     "Pole Vector": "Knee or elbow IK pole vector control",
     "Roll": "Circular rotation and foot-roll control",
+    "Roll Reverse": "Foot-roll arc with its arrow traveling in the opposite direction",
+    "Spiral CW": "Clockwise spiral control for twist or winding direction",
+    "Spiral CCW": "Counterclockwise spiral control for twist or winding direction",
     "Foot": "Foot and ankle control outline",
     "Global": "Large master or global rig control",
     "FK Control": "Three-axis FK rotation control",
@@ -140,6 +147,28 @@ def segments(shape, size=2.0, plane="XY"):
         tip = (.39 * math.cos(tip_angle), .39 * math.sin(tip_angle))
         tangent = (-math.sin(tip_angle), math.cos(tip_angle))
         return [arc, _arrow_head(tip, tangent, size, plane, .14, .09)]
+    if shape == "Roll Reverse":
+        arc = _ring(.39, size, plane, start=math.radians(325),
+                    end=math.radians(35), count=44)
+        tip_angle = math.radians(35)
+        tip = (.39 * math.cos(tip_angle), .39 * math.sin(tip_angle))
+        tangent = (math.sin(tip_angle), -math.cos(tip_angle))
+        return [arc, _arrow_head(tip, tangent, size, plane, .14, .09)]
+    if shape in ("Spiral CW", "Spiral CCW"):
+        direction = -1.0 if shape == "Spiral CW" else 1.0
+        turns = 2.5
+        steps = 100
+        start_angle = math.radians(-90)
+        points = []
+        for index in range(steps + 1):
+            fraction = index / steps
+            angle = start_angle + direction * turns * 2.0 * math.pi * fraction
+            radius = .035 + .40 * fraction
+            points.append((radius * math.cos(angle), radius * math.sin(angle)))
+        tip_angle = start_angle + direction * turns * 2.0 * math.pi
+        tangent = (direction * -math.sin(tip_angle), direction * math.cos(tip_angle))
+        return [_scaled(points, size, plane),
+                _arrow_head(points[-1], tangent, size, plane, .12, .075)]
     if shape == "Foot":
         outline = [(-.16, -.5), (.16, -.5), (.18, -.23), (.25, -.02),
                    (.32, .18), (.34, .32), (.27, .44), (.19, .39),
