@@ -5,7 +5,7 @@ import math
 SHAPE_NAMES = (
     "Circle", "Square", "Triangle", "Box", "Arrow", "Bidirectional Arrow", "Cross", "Locator",
     "Pole Vector", "Roll", "Foot", "Global", "FK Control", "IK Control",
-    "Slider", "Stretch",
+    "Slider", "Stretch", "Lollipop Finger",
 )
 PLANES = ("XY", "XZ", "YZ")
 ICON_FILES = {
@@ -25,6 +25,7 @@ ICON_FILES = {
     "IK Control": "ik_control.svg",
     "Slider": "slider.svg",
     "Stretch": "stretch.svg",
+    "Lollipop Finger": "lollipop_finger.svg",
 }
 SHAPE_DESCRIPTIONS = {
     "Circle": "General rotation or round control",
@@ -43,6 +44,7 @@ SHAPE_DESCRIPTIONS = {
     "IK Control": "Square IK handle control",
     "Slider": "Horizontal attribute or space slider",
     "Stretch": "Limb length and stretch control",
+    "Lollipop Finger": "Finger controller with its stem anchored at the origin",
 }
 
 
@@ -180,4 +182,9 @@ def segments(shape, size=2.0, plane="XY"):
         bars = [_scaled([(-.2, -.32), (.2, -.32)], size, plane),
                 _scaled([(-.2, .32), (.2, .32)], size, plane)]
         return [shaft, bottom, top] + bars
+    if shape == "Lollipop Finger":
+        # Keep the stem's base exactly at local/world origin for finger pivots.
+        stem = _scaled([(0, 0), (0, .46)], size, plane)
+        head = _ring(.25, size, plane, center=(0, .70), count=40)
+        return [stem, head]
     raise ValueError("Unknown controller shape: {}".format(shape))

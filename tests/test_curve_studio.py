@@ -208,6 +208,17 @@ class GeometryTests(unittest.TestCase):
                 self.assertAlmostEqual(min(point[outline_axis] for point in result[0]), -1.0)
                 self.assertAlmostEqual(max(point[outline_axis] for point in result[0]), 1.0)
 
+    def test_lollipop_finger_stem_is_anchored_at_origin(self):
+        for plane in PLANES:
+            with self.subTest(plane=plane):
+                stem, head = segments("Lollipop Finger", 2.0, plane)
+                self.assertEqual(stem[0], (0.0, 0.0, 0.0))
+                expected_tip = {"XY": (0.0, .92, 0.0),
+                                "XZ": (0.0, 0.0, .92),
+                                "YZ": (0.0, 0.0, .92)}[plane]
+                self.assertEqual(stem[1], expected_tip)
+                self.assertTrue(all(abs(a - b) < 1e-8 for a, b in zip(head[0], head[-1])))
+
     def test_foot_global_fk_ik_slider_and_stretch_are_distinct_shapes(self):
         shapes = ("Foot", "Global", "FK Control", "IK Control", "Slider", "Stretch")
         outlines = {name: segments(name, 2.0, "XY") for name in shapes}
