@@ -6,7 +6,7 @@ SHAPE_NAMES = (
     "Circle", "Square", "Triangle", "Box", "Arrow", "Bidirectional Arrow", "Cross", "Locator",
     "Pole Vector", "Roll", "Roll Reverse", "Spiral CW", "Spiral CCW",
     "Foot", "Global", "FK Control", "IK Control",
-    "Slider", "Stretch", "Lollipop Finger",
+    "Slider", "Stretch", "Lollipop Finger", "Aim Target", "Joint",
 )
 PLANES = ("XY", "XZ", "YZ")
 ICON_FILES = {
@@ -30,6 +30,8 @@ ICON_FILES = {
     "Slider": "slider.svg",
     "Stretch": "stretch.svg",
     "Lollipop Finger": "lollipop_finger.svg",
+    "Aim Target": "aim_target.svg",
+    "Joint": "joint.svg",
 }
 SHAPE_DESCRIPTIONS = {
     "Circle": "General rotation or round control",
@@ -52,6 +54,8 @@ SHAPE_DESCRIPTIONS = {
     "Slider": "Horizontal attribute or space slider",
     "Stretch": "Limb length and stretch control",
     "Lollipop Finger": "Finger controller with its stem anchored at the origin",
+    "Aim Target": "Concentric target and open crosshairs for aim and look-at controls",
+    "Joint": "Bone-style joint marker for locating or orienting rig joints",
 }
 
 
@@ -216,4 +220,22 @@ def segments(shape, size=2.0, plane="XY"):
         stem = _scaled([(0, 0), (0, .46)], size, plane)
         head = _ring(.25, size, plane, center=(0, .70), count=40)
         return [stem, head]
+    if shape == "Aim Target":
+        outer = _ring(.39, size, plane, count=48)
+        inner = _ring(.13, size, plane, count=32)
+        crosshairs = [
+            _scaled([(0, .47), (0, .19)], size, plane),
+            _scaled([(0, -.19), (0, -.47)], size, plane),
+            _scaled([(.19, 0), (.47, 0)], size, plane),
+            _scaled([(-.19, 0), (-.47, 0)], size, plane),
+        ]
+        return [outer, inner] + crosshairs
+    if shape == "Joint":
+        bone = _scaled([(-.31, 0), (.31, 0)], size, plane)
+        center = _ring(.15, size, plane, count=32)
+        left = _ring(.075, size, plane, center=(-.39, 0), count=24)
+        right = _ring(.075, size, plane, center=(.39, 0), count=24)
+        axis_ticks = [_scaled([(-.39, -.17), (-.39, -.10)], size, plane),
+                      _scaled([(.39, -.17), (.39, -.10)], size, plane)]
+        return [bone, center, left, right] + axis_ticks
     raise ValueError("Unknown controller shape: {}".format(shape))

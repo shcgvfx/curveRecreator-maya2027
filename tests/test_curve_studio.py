@@ -246,6 +246,20 @@ class GeometryTests(unittest.TestCase):
         outlines = {name: segments(name, 2.0, "XY") for name in shapes}
         self.assertEqual(len({tuple(map(len, lines)) for lines in outlines.values()}), len(shapes))
 
+    def test_aim_target_and_joint_shapes_have_expected_planar_geometry(self):
+        for plane in PLANES:
+            with self.subTest(plane=plane):
+                target = segments("Aim Target", 2.0, plane)
+                joint = segments("Joint", 2.0, plane)
+                self.assertEqual(len(target), 6)
+                self.assertEqual(len(joint), 6)
+                zero_axis = {"XY": 2, "XZ": 1, "YZ": 0}[plane]
+                self.assertTrue(all(abs(point[zero_axis]) < 1e-9
+                                    for line in target + joint for point in line))
+                for line in (target[0], target[1], *joint[1:4]):
+                    self.assertTrue(all(abs(a - b) < 1e-8
+                                        for a, b in zip(line[0], line[-1])))
+
     def test_invalid_size_plane_and_shape_are_rejected(self):
         for size in (0, -1, float("inf"), "bad"):
             with self.subTest(size=size), self.assertRaises(ValueError):
