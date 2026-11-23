@@ -3,7 +3,7 @@ import math
 
 
 SHAPE_NAMES = (
-    "Circle", "Square", "Triangle", "Box", "Arrow", "Cross", "Locator",
+    "Circle", "Square", "Triangle", "Box", "Arrow", "Bidirectional Arrow", "Cross", "Locator",
     "Pole Vector", "Roll", "Foot", "Global", "FK Control", "IK Control",
     "Slider", "Stretch",
 )
@@ -14,6 +14,7 @@ ICON_FILES = {
     "Triangle": "triangle.svg",
     "Box": "box.svg",
     "Arrow": "arrow.svg",
+    "Bidirectional Arrow": "bidirectional_arrow.svg",
     "Cross": "cross.svg",
     "Locator": "locator.svg",
     "Pole Vector": "pole_vector.svg",
@@ -31,6 +32,7 @@ SHAPE_DESCRIPTIONS = {
     "Triangle": "Directional or selector control",
     "Box": "Three-dimensional root or body control",
     "Arrow": "One-way direction and aim control",
+    "Bidirectional Arrow": "Two-way direction, stretch, and translation control",
     "Cross": "Three-axis alignment control",
     "Locator": "Compact position marker",
     "Pole Vector": "Knee or elbow IK pole vector control",
@@ -101,6 +103,11 @@ def segments(shape, size=2.0, plane="XY"):
         return [_scaled([(-.5, -.12), (.18, -.12), (.18, -.32),
                          (.5, 0), (.18, .32), (.18, .12), (-.5, .12),
                          (-.5, -.12)], size, plane)]
+    if shape == "Bidirectional Arrow":
+        return [_scaled([(-.5, 0), (-.28, .22), (-.28, .11),
+                         (.28, .11), (.28, .22), (.5, 0),
+                         (.28, -.22), (.28, -.11), (-.28, -.11),
+                         (-.28, -.22), (-.5, 0)], size, plane)]
     if shape == "Box":
         cube = [
             [(-.5, -.5, -.5), (.5, -.5, -.5), (.5, .5, -.5), (-.5, .5, -.5), (-.5, -.5, -.5)],

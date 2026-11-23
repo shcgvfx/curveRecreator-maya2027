@@ -196,6 +196,18 @@ class GeometryTests(unittest.TestCase):
         self.assertGreater(len(result[0]), 40)
         self.assertEqual(result[1][0], result[1][-1])
 
+    def test_bidirectional_arrow_is_a_closed_two_headed_outline(self):
+        for plane in PLANES:
+            with self.subTest(plane=plane):
+                result = segments("Bidirectional Arrow", 2.0, plane)
+                self.assertEqual(len(result), 1)
+                self.assertEqual(result[0][0], result[0][-1])
+                axis = {"XY": 2, "XZ": 1, "YZ": 0}[plane]
+                self.assertTrue(all(abs(point[axis]) < 1e-9 for point in result[0]))
+                outline_axis = {"XY": 0, "XZ": 0, "YZ": 1}[plane]
+                self.assertAlmostEqual(min(point[outline_axis] for point in result[0]), -1.0)
+                self.assertAlmostEqual(max(point[outline_axis] for point in result[0]), 1.0)
+
     def test_foot_global_fk_ik_slider_and_stretch_are_distinct_shapes(self):
         shapes = ("Foot", "Global", "FK Control", "IK Control", "Slider", "Stretch")
         outlines = {name: segments(name, 2.0, "XY") for name in shapes}
